@@ -35,12 +35,16 @@ Resources:
                 - iam:CreateLoginProfile
                 - iam:ListGroups
                 - iam:AddUserToGroup
-              Resource: "arn:aws:iam::*:user/*"
+              Resource: "arn:aws:iam::*"
             - Effect: Allow
               Action:
                 # - secretsmanager:DescribeSecret
                 - secretsmanager:GetSecretValue
               Resource: !Sub "arn:aws:secretsmanager:*:secret:${PJPrefix}-secret-*"
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetRandomPassword
+              Resource: "*"
       SnapStart:
         ApplyOn: None
   secret:

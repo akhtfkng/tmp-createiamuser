@@ -109,7 +109,8 @@ export const handler = async(event) => {
   if (iamUserName == "") {
     return "iamUserName is invalid";
   }
-  const iamGroupNames = Array.isArray(event.iamGroupNames)? event.iamGroupNames : [];
+
+  const iamGroupNames = event.iamGroupNames? event.iamGroupNames.split(",") : [];
   console.log("iamGroupNames:"+JSON.stringify(iamGroupNames));
   if (iamGroupNames.length == 0) {
     return "iamGroupNames is invalid";
