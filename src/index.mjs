@@ -41,21 +41,6 @@ export const handler = async(event) => {
     return response.RandomPassword;
   }
 
-  const checkInputValue = async(iamUserName, iamGroupNames, slackMemberId) => {
-    if (!iamUserName || iamUserName == "") {
-      console.log("iamUserName is invalid");
-      return false;
-    }
-    if (!iamGroupNames || iamGroupNames == "") {
-      console.log("iamGroupNames is invalid");
-      return false;
-    }
-    if (!slackMemberId || slackMemberId == "") {
-      console.log("slackMemberId is invalid");
-      return false;
-    }
-  }
-
   const createUser = async(iamUserName) => {
     console.log("start:createUser");
     const client = new IAMClient();
@@ -119,17 +104,25 @@ export const handler = async(event) => {
     return response;
   }
 
-  const iamUserName = event.iamUserName;
-  const iamGroupNames = event.iamGroupNames;
-  const slackMemberId = event.slackMemberId;
+  const iamUserName = event.iamUserName? event.iamUserName : "";
+  console.log("iamUserName:"+iamUserName);
+  if (iamUserName == "") {
+    return "iamUserName is invalid";
+  }
+  const iamGroupNames = Array.isArray(event.iamGroupNames)? event.iamGroupNames : [];
+  console.log("iamGroupNames:"+JSON.stringify(iamGroupNames));
+  if (iamGroupNames.length == 0) {
+    return "iamGroupNames is invalid";
+  }
+  const slackMemberId = event.slackMemberId? event.slackMemberId : "";
+  console.log("slackMemberId:"+slackMemberId);
+  if (slackMemberId == "") {
+    return "slackMemberId is invalid";
+  }
   const botUserOAuthToken = await getbotUserOAuthToken();
   const password = await createPassword();
 
   try {
-    const checkResult = await checkInputValue(iamUserName, iamGroupNames, slackMemberId);
-    if (checkResult == false) {
-      return {"result" : "Validation Error"};
-    }
     await createUser(iamUserName);
     await craeteLoginProfile(iamUserName, password);
     await iamGroupNames.forEach((iamGroupName) =>{
