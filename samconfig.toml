@@ -1,0 +1,9 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "create-user-function"
+resolve_s3 = true
+s3_prefix = "create-user-function"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "PJPrefix=\"create-user-function\""
+image_repositories = []

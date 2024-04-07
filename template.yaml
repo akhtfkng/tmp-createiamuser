@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  PJPrefix:
+    Type: String
+    Default: create-user-function
+Resources:
+  createUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src
+      Description: AWS Lambda function.
+      FunctionName: !Ref PJPrefix
+      MemorySize: 128
+      Timeout: 3
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 60
+        MaximumRetryAttempts: 2
+      Environment:
+        Variables:
+          secretName: !Sub ${PJPrefix}-secret
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - iam:ListUsers
+                - iam:CreateUser
+                - iam:CreateLoginProfile
+                - iam:ListGroups
+                - iam:AddUserToGroup
+              Resource: "arn:aws:iam::*:user/*"
+            - Effect: Allow
+              Action:
+                # - secretsmanager:DescribeSecret
+                - secretsmanager:GetSecretValue
+              Resource: !Sub "arn:aws:secretsmanager:*:secret:${PJPrefix}-secret-*"
+      SnapStart:
+        ApplyOn: None
+  secret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${PJPrefix}-secret
+      Description: My secret
