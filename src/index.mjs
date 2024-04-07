@@ -41,6 +41,21 @@ export const handler = async(event) => {
     return response.RandomPassword;
   }
 
+  const checkInputValue = async(iamUserName, iamGroupNames, slackMemberId) => {
+    if (!iamUserName || iamUserName == "") {
+      console.log("iamUserName is invalid");
+      return false;
+    }
+    if (!iamGroupNames || iamGroupNames == "") {
+      console.log("iamGroupNames is invalid");
+      return false;
+    }
+    if (!slackMemberId || slackMemberId == "") {
+      console.log("slackMemberId is invalid");
+      return false;
+    }
+  }
+
   const createUser = async(iamUserName) => {
     console.log("start:createUser");
     const client = new IAMClient();
@@ -109,18 +124,21 @@ export const handler = async(event) => {
   const slackMemberId = event.slackMemberId;
   const botUserOAuthToken = await getbotUserOAuthToken();
   const password = await createPassword();
-  const message = "パスワードは "+password+" です";
 
   try {
+    const checkResult = await checkInputValue(iamUserName, iamGroupNames, slackMemberId);
+    if (checkResult == false) {
+      return {"result" : "Validation Error"};
+    }
     await createUser(iamUserName);
     await craeteLoginProfile(iamUserName, password);
     await iamGroupNames.forEach((iamGroupName) =>{
        addUserToGroup(iamUserName, iamGroupName);
     })
-    await sendPassword(botUserOAuthToken, slackMemberId, message);
+    await sendPassword(botUserOAuthToken, slackMemberId, "パスワードは "+password+" です");
   } catch (e) {
     console.log(e);
-    return {"result" : "Error"};
+    return {"result" : "System Error"};
   }
   return {"result" : "Success"};
 };
